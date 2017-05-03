@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<head>
+<title>Home_owner_data</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+    <h1>Homeowner Data</h1>
+    {% for table in tables %}
+      <h2>{{titles[loop.index]}}</h2>
+      {{ table|safe }}
+    {% endfor %}
+</div>
+
+<style>
+.bar {
+  fill: orange;
+}
+
+.bar:hover {
+  fill: green;
+}
+
+.axis {
+  font: 13px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+<script>
+var chartData = {{ data | safe }};
+console.log(chartData);
+
+var margin = {
+    top: 20,
+    right: 20,
+    bottom: 70,
+    left: 40
+  },
+  width = 600 - margin.left - margin.right,
+  height = 300 - margin.top - margin.bottom;
+
+
+// set the ranges
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .15);
+
+var y = d3.scale.linear().range([height, 0]);
+
+// define the axis
+var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom")
+
+
+var yAxis = d3.svg.axis()
+  .scale(y)
+  .orient("left")
+  .ticks(10);
+
+
+// add the SVG element
+var svg = d3.select("body").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
+
+
+// load the data
+
+// directly map your data here
+chartData.forEach(function(d) {
+  d.ethinicity = d[1];
+  d.percent_home_owners = +d[0];
+});
+
+//console.log(chartData);
+
+// scale the range of the data
+x.domain(chartData.map(function(d) {
+  return d.ethinicity;
+}));
+y.domain([0, d3.max(chartData, function(d) {
+  return d.percent_home_owners;
+})]);
+
+// add axis
+svg.append("g")
+  .attr("class", "x axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis)
+  .selectAll("text")
+  .style("text-anchor", "end")
+  .attr("dx", "-.8em")
+  .attr("dy", "-.55em")
+  .attr("transform", "rotate(-55)");
+
+
+svg.append("g")
+  .attr("class", "y axis")
+  .call(yAxis)
+  .append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("y", -30)
+  .attr("x", -30)
+  .style("text-anchor", "end")
+  .text("percent_home_owners");
+
+
+// Add bar chart
+svg.selectAll("bar")
+  .data(chartData)
+  .enter().append("rect")
+  .attr("class", "bar")
+  .attr("x", function(d) {
+    return x(d.ethinicity);
+  })
+  .attr("width", x.rangeBand())
+  .attr("y", function(d) {
+    return y(d.percent_home_owners);
+  })
+  .attr("height", function(d) {
+    return height - y(d.percent_home_owners);
+  });
+
+
+
+
+</script>
+</body>
