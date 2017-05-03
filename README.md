@@ -1,5 +1,5 @@
 # mass_mutual
-I have implemented my visualizations on a web page. Here are the urls:
+I have implemented my visualizations on a web page. Here are the urls once the applications is up and running.
 
 http://localhost:8010/social_media_summary
 
