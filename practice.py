@@ -1,6 +1,9 @@
 import sqlite3
 import pandas as pd
 from flask import *
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from io import BytesIO,StringIO
 app = Flask(__name__)
 @app.route("/social_media_summary")
 def show_graph():
@@ -60,5 +63,43 @@ def new_graph():
     return render_template('new_display.html',data=data,tables=[percent_df.to_html(classes='Home_owner_data')],
     titles=['Home_owner_data'])
 
+@app.route("/buff/")
+def new_fig():
+    connection = sqlite3.connect('recruit.db')
+    query = "select * from customer"
+    df_customer = pd.read_sql(query, connection)
+    trial_df = df_customer.loc[:,['state','race_code','travel_spending']]
+    travel_df = trial_df.groupby(['state','race_code']).agg({'travel_spending':'mean'})
+    travel_df = travel_df.reset_index()
+    filter_travel = travel_df[(travel_df.state=='CA')|(travel_df.state=='MA')|(travel_df.state=='NY')]
+    query = "select * from race"
+    df_race = pd.read_sql(query,connection)
+    df_race.columns = ['race_code','value']
+    travel_df_new = filter_travel.merge(df_race,on='race_code',how='right')
+    travel_df_new = travel_df_new.drop(['race_code'],axis=1)
+    travel_df_new.columns = ['state','avg_travel_spending','ethinicity']
+    travel_df_new.set_index(['state','ethinicity'],inplace=True)
+
+    plt.style.use('ggplot')
+
+    plt.rcParams['xtick.color']='k'
+    plt.rcParams['xtick.labelsize']='x-large'
+
+
+    travel_df_new.unstack(level=0).plot(kind='bar', subplots=True, legend=False)
+    buff = BytesIO()
+    plt.tight_layout()
+    plt.savefig(buff, format='png', dpi=150)
+    buff.seek(0)
+    return send_file(buff, mimetype='image/png')
+
+@app.route('/image/')
+def images():
+    return render_template("image.html")
+
+
+
+
+
 if __name__ == "__main__":
-    app.run( port=8085,debug=True)
+    app.run( port=8010,debug=True)
