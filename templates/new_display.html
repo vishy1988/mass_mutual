@@ -34,8 +34,8 @@
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
 <script>
-var chartData = {{ data | safe }};
-console.log(chartData);
+var Data = {{ data | safe }};
+console.log(Data);
 
 var margin = {
     top: 20,
@@ -76,18 +76,18 @@ var svg = d3.select("body").append("svg")
 // load the data
 
 // directly map your data here
-chartData.forEach(function(d) {
-  d.ethinicity = d[1];
+Data.forEach(function(d) {
+  d.race = d[1];
   d.percent_home_owners = +d[0];
 });
 
 //console.log(chartData);
 
 // scale the range of the data
-x.domain(chartData.map(function(d) {
-  return d.ethinicity;
+x.domain(Data.map(function(d) {
+  return d.race;
 }));
-y.domain([0, d3.max(chartData, function(d) {
+y.domain([0, d3.max(Data, function(d) {
   return d.percent_home_owners;
 })]);
 
@@ -120,7 +120,7 @@ svg.selectAll("bar")
   .enter().append("rect")
   .attr("class", "bar")
   .attr("x", function(d) {
-    return x(d.ethinicity);
+    return x(d.race);
   })
   .attr("width", x.rangeBand())
   .attr("y", function(d) {
