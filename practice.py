@@ -10,20 +10,20 @@ def show_graph():
     connection = sqlite3.connect('recruit.db')
     query = "select * from customer"
     df_customer = pd.read_sql(query, connection)
-    df_fb_usage = df_customer.loc[:,['race_code','facebook_user_rank']]
-    df_fb_usage.facebook_user_rank = df_fb_usage.facebook_user_rank.astype(int)
-    plot_df = df_fb_usage.groupby('race_code').agg({'facebook_user_rank':'mean'})
-    plot_df = plot_df.reset_index()
+    FB_Data = df_customer.loc[:,['race_code','facebook_user_rank']]
+    FB_Data.facebook_user_rank = FB_Data.facebook_user_rank.astype(int)
+    race_data = FB_Data.groupby('race_code').agg({'facebook_user_rank':'mean'})
+    race_data = race_data.reset_index()
     query = "select * from race"
     df_race = pd.read_sql(query,connection)
     df_race.columns = ['race_code','value']
-    Plot_df_new = plot_df.merge(df_race,on='race_code',how='left')
-    Plot_df_new = Plot_df_new.drop(['race_code'],axis=1)
-    Plot_df_new.columns = ['Avg_Facebook_User_Rank','Ethinicity']
-    df_list = Plot_df_new.values.tolist()
-    Plot_df_new.set_index('Ethinicity',inplace=True)
-    data = json.dumps(df_list)
-    return render_template('display.html',data=data,tables=[Plot_df_new.to_html(classes='Facebook_Usage_SumBmary')],
+    race_data_plot = race_data.merge(df_race,on='race_code',how='left')
+    race_data_plot = race_data_plot.drop(['race_code'],axis=1)
+    race_data_plot.columns = ['Avg_Facebook_User_Rank','Ethinicity']
+    race_data_list = race_data_plot.values.tolist()
+    race_data_plot.set_index('Ethinicity',inplace=True)
+    data = json.dumps(race_data_list)
+    return render_template('display.html',data=data,tables=[race_data_plot.to_html(classes='Facebook_Usage_Summmary')],
     titles=['Facebook_Usage_Summary'])
 @app.route("/Home_Owner_Details")
 def new_graph():
@@ -75,10 +75,10 @@ def new_fig():
     query = "select * from race"
     df_race = pd.read_sql(query,connection)
     df_race.columns = ['race_code','value']
-    travel_df_new = filter_travel.merge(df_race,on='race_code',how='right')
-    travel_df_new = travel_df_new.drop(['race_code'],axis=1)
-    travel_df_new.columns = ['state','avg_travel_spending','ethinicity']
-    travel_df_new.set_index(['state','ethinicity'],inplace=True)
+    travel_data = filter_travel.merge(df_race,on='race_code',how='right')
+    travel_data = travel_data.drop(['race_code'],axis=1)
+    travel_data.columns = ['state','avg_travel_spending','ethinicity']
+    travel_data.set_index(['state','ethinicity'],inplace=True)
 
     plt.style.use('ggplot')
 
@@ -86,7 +86,7 @@ def new_fig():
     plt.rcParams['xtick.labelsize']='x-large'
 
 
-    travel_df_new.unstack(level=0).plot(kind='bar', subplots=True, legend=False)
+    travel_data.unstack(level=0).plot(kind='bar', subplots=True, legend=False)
     buff = BytesIO()
     plt.tight_layout()
     plt.savefig(buff, format='png', dpi=150)
