@@ -116,7 +116,7 @@ svg.append("g")
 
 // Add bar chart
 svg.selectAll("bar")
-  .data(chartData)
+  .data(Data)
   .enter().append("rect")
   .attr("class", "bar")
   .attr("x", function(d) {
