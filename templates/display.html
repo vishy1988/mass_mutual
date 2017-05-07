@@ -86,9 +86,9 @@ Data.forEach(function(d) {
 x.domain(Data.map(function(d) {
   return d.race;
 }));
-y.domain([0, d3.max(Data, function(d) {
+y.domain([d3.max(Data, function(d) {
   return d.avg_rank;
-})]);
+}),0]);
 
 // add axis
 svg.append("g")
